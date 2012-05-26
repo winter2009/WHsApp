@@ -20,6 +20,12 @@
 		<?php echo $form->passwordField($model,'password',array('size'=>60,'maxlength'=>255)); ?>
 		<?php echo $form->error($model,'password'); ?>
 	</div>
+    
+    <div class="row">
+		<?php echo $form->labelEx($model,'password_repeat'); ?>
+		<?php echo $form->passwordField($model,'password_repeat',array('size'=>60,'maxlength'=>128)); ?>
+		<?php echo $form->error($model,'password_repeat'); ?>
+	</div>
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'created'); ?>
@@ -37,6 +43,12 @@
 		<?php echo $form->labelEx($model,'role_id'); ?>
 		<?php echo $form->textField($model,'role_id'); ?>
 		<?php echo $form->error($model,'role_id'); ?>
+	</div>
+
+	<div class="row">
+		<?php echo $form->labelEx($model,'salt'); ?>
+		<?php echo $form->textField($model,'salt',array('size'=>60,'maxlength'=>64)); ?>
+		<?php echo $form->error($model,'salt'); ?>
 	</div>
 
 	<div class="row buttons">

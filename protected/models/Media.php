@@ -11,9 +11,6 @@
  * @property string $media_modified
  * @property string $media_description
  * @property integer $sub_category_id
- *
- * The followings are the available model relations:
- * @property SubCategory $subCategory
  */
 class Media extends CActiveRecord
 {
@@ -60,7 +57,6 @@ class Media extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'subCategory' => array(self::BELONGS_TO, 'SubCategory', 'sub_category_id'),
 		);
 	}
 

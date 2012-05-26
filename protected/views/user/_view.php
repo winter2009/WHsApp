@@ -24,5 +24,9 @@
 	<?php echo CHtml::encode($data->role_id); ?>
 	<br />
 
+	<b><?php echo CHtml::encode($data->getAttributeLabel('salt')); ?>:</b>
+	<?php echo CHtml::encode($data->salt); ?>
+	<br />
+
 
 </div>

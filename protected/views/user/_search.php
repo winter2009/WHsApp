@@ -30,6 +30,11 @@
 		<?php echo $form->textField($model,'role_id'); ?>
 	</div>
 
+	<div class="row">
+		<?php echo $form->label($model,'salt'); ?>
+		<?php echo $form->textField($model,'salt',array('size'=>60,'maxlength'=>64)); ?>
+	</div>
+
 	<div class="row buttons">
 		<?php echo CHtml::submitButton('Search'); ?>
 	</div>

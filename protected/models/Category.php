@@ -7,9 +7,6 @@
  * @property integer $id
  * @property string $category_name
  * @property string $category_description
- *
- * The followings are the available model relations:
- * @property SubCategory[] $subCategories
  */
 class Category extends CActiveRecord
 {
@@ -55,7 +52,6 @@ class Category extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'subCategories' => array(self::HAS_MANY, 'SubCategory', 'parent_id'),
 		);
 	}
 

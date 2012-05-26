@@ -24,5 +24,6 @@ $this->menu=array(
 		'created',
 		'modified',
 		'role_id',
+		'salt',
 	),
 )); ?>

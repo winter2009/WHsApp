@@ -8,10 +8,6 @@
  * @property string $sub_category_name
  * @property string $sub_category_description
  * @property integer $parent_id
- *
- * The followings are the available model relations:
- * @property Media[] $medias
- * @property Category $parent
  */
 class SubCategory extends CActiveRecord
 {
@@ -58,8 +54,6 @@ class SubCategory extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'medias' => array(self::HAS_MANY, 'Media', 'sub_category_id'),
-			'parent' => array(self::BELONGS_TO, 'Category', 'parent_id'),
 		);
 	}
 

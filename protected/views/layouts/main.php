@@ -31,9 +31,11 @@
                     'items' => array(
                         array('label' => 'Home', 'url' => array('/site/index')),
                         array('label' => 'Category', 'url' => array('/category/index')),
+                        array('label' => 'Sub Category', 'url' => array('/subCategory/index')),
                         array('label' => 'Media', 'url' => array('/media/index')),
                         array('label' => 'Message', 'url' => array('/message/index')),
-                        array('label' => 'User', 'url' => array('/user/index')),                        
+                        array('label' => 'User', 'url' => array('/user/index')),
+                        array('label' => 'Role', 'url' => array('/role/index')),
                         array('label' => 'About', 'url' => array('/site/page', 'view' => 'about')),
                         array('label' => 'Contact', 'url' => array('/site/contact')),
                         array('label' => 'Login', 'url' => array('/site/login'), 'visible' => Yii::app()->user->isGuest),

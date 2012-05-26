@@ -10,14 +10,12 @@
  * @property string $created
  * @property string $modified
  * @property integer $role_id
- *
- * The followings are the available model relations:
- * @property Message[] $messages
- * @property Message[] $messages1
- * @property Role $role
+ * @property string $salt
  */
 class User extends CActiveRecord
 {
+    public $password_repeat;
+    
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -27,6 +25,30 @@ class User extends CActiveRecord
 	{
 		return parent::model($className);
 	}
+    
+    public static function generateSalt()
+    {
+        return "$2a$07$".md5(mcrypt_create_iv(22, MCRYPT_DEV_URANDOM))."$";
+    }
+    
+    /**
+     * perform one-way encryption on the password before we store it in the database
+     */
+    protected function afterValidate()
+    {
+        parent::afterValidate();
+        $this->password = $this->encrypt($this->password);
+    }
+    
+    public function validatePassword($password)
+    {
+        return $this->encrypt($password) === $this->password;
+    }
+    
+    public function encrypt($value)
+    {
+        return crypt($value, $this->salt);
+    }
 
 	/**
 	 * @return string the associated database table name
@@ -45,11 +67,14 @@ class User extends CActiveRecord
 		// will receive user inputs.
 		return array(
 			array('username, password, role_id', 'required'),
+            array('password', 'compare'),
+            array('password_repeat, salt', 'safe'),
 			array('role_id', 'numerical', 'integerOnly'=>true),
 			array('username, password, created, modified', 'length', 'max'=>255),
+			array('salt', 'length', 'max'=>64),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, username, password, created, modified, role_id', 'safe', 'on'=>'search'),
+			array('id, username, password, created, modified, role_id, salt', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -61,9 +86,7 @@ class User extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'messages' => array(self::HAS_MANY, 'Message', 'sender_id'),
-			'messages1' => array(self::HAS_MANY, 'Message', 'receiver_id'),
-			'role' => array(self::BELONGS_TO, 'Role', 'role_id'),
+            'role' => array(self::BELONGS_TO, 'Role', 'role_id')
 		);
 	}
 
@@ -79,6 +102,7 @@ class User extends CActiveRecord
 			'created' => 'Created',
 			'modified' => 'Modified',
 			'role_id' => 'Role',
+			'salt' => 'Salt',
 		);
 	}
 
@@ -99,6 +123,7 @@ class User extends CActiveRecord
 		$criteria->compare('created',$this->created,true);
 		$criteria->compare('modified',$this->modified,true);
 		$criteria->compare('role_id',$this->role_id);
+		$criteria->compare('salt',$this->salt,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,

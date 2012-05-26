@@ -11,12 +11,6 @@
  * @property string $content
  * @property string $date
  * @property integer $parent_message_id
- *
- * The followings are the available model relations:
- * @property Message $parentMessage
- * @property Message[] $messages
- * @property User $sender
- * @property User $receiver
  */
 class Message extends CActiveRecord
 {
@@ -64,10 +58,6 @@ class Message extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'parentMessage' => array(self::BELONGS_TO, 'Message', 'parent_message_id'),
-			'messages' => array(self::HAS_MANY, 'Message', 'parent_message_id'),
-			'sender' => array(self::BELONGS_TO, 'User', 'sender_id'),
-			'receiver' => array(self::BELONGS_TO, 'User', 'receiver_id'),
 		);
 	}
 

@@ -7,9 +7,6 @@
  * @property integer $id
  * @property string $role_name
  * @property string $role_description
- *
- * The followings are the available model relations:
- * @property User[] $users
  */
 class Role extends CActiveRecord
 {
@@ -55,7 +52,6 @@ class Role extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'users' => array(self::HAS_MANY, 'User', 'role_id'),
 		);
 	}
 
