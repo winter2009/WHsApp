@@ -26,7 +26,6 @@ class ApiController extends Controller
 
     private $apnsCert = "ck_production.pem";
     private $apnsHost = 'gateway.push.apple.com';
-    
     private $apnsPort = '2195';
     private $passPhrase = 'pspfzh1307';
 
@@ -48,7 +47,8 @@ class ApiController extends Controller
         {
             // Error: Unauthorized
             return false;
-        } else if (!$user->validatePassword($password))
+        }
+        else if (!$user->validatePassword($password))
         {
             // Error: Unauthorized
             return false;
@@ -73,65 +73,191 @@ class ApiController extends Controller
         {
             $result['status'] = 'Error';
             $result['message'] = '邮箱或密码错误';
-        } else
+        }
+        else
         {
             // TODO: using transactions
             $user = User::model()->find('LOWER(username)=?', array(strtolower($_SERVER['HTTP_USERNAME'])));
-            $user->latitude = $_POST['latitude'];
-            $user->longitude = $_POST['longitude'];
-            $user->last_login_time = gmdate("Y-m-d h:i:s", time());            
-
-//            echo CJSON::encode($user);
-
-            if ($user->save(false))
-            {
-                $userString = CJSON::encode($user);
-                $userDict = CJSON::decode($userString);
-
-                $userDict['province'] = $user->provinceText;
-                $userDict['city'] = $user->cityText;
-                $userDict['love_role'] = $user->loveRoleText;
-                $userDict['come_out_status'] = $user->comeOutStatusText;
-                $userDict['marriage_status'] = $user->marriageStatusText;
-                $userDict['looking_for'] = $user->lookingForText;
-                $userDict['profession'] = $user->professionText;
-                $userDict['smoke_status'] = $user->smokeStatusText;
-                $userDict['drink_status'] = $user->drinkStatusText;
-
-                if (isset($_POST['device_infor']))
-                {
-//                    echo "save device infor\n";
-                    $deviceInfor = CJSON::decode($_POST['device_infor']);
-                    if ($deviceInfor['device_token'] != NULL)
-                    {
-//                        echo "save device infor 1\n";
-                        $appName = $deviceInfor['app_name'];
-                        $appVersion = $deviceInfor['app_version'];
-                        $deviceUID = $deviceInfor['device_uid'];
-                        $deviceToken = $deviceInfor['device_token'];
-                        $deviceName = $deviceInfor['device_name'];
-                        $deviceModel = $deviceInfor['device_model'];
-                        $deviceVersion = $deviceInfor['device_version'];
-                        $userID = $user->id;
-//                        echo "user: " . $userID . "\n";
-
-                        if (!$this->registerDevice($appName, $appVersion, $deviceUID, $deviceToken, $deviceName, $deviceModel, $deviceVersion, $userID))
-                        {
-                            $result['message'] = 'Failed register device for push notification';
-                        }
-                    }
-                }
-                $result['status'] = 'OK';
-                $result['user'] = $userDict;
-            } else
-            {
-                $result['status'] = 'Error';
-                $result['message'] = '无法保存用户信息';
-            }
+            
+            $result['status'] = 'OK';
+            $result['user'] = $user;            
         }
 
         echo CJSON::encode($result);
+        Yii::app()->end();
     }
+    
+    public function actionRegisterUser()
+    {
+        $result = array();
+        if ( isset($_POST['nick_name']) and isset($_POST['email']) and isset($_POST['password']) )
+        {
+            $user = new User;
+            $user->nick_name = $_POST['nick_name'];
+            $user->password = $_POST['password'];
+            $user->password_repeat = $_POST['password'];
+            $user->salt = User::generateSalt();
+            $user->email = $_POST['email'];
+            
+            if ( $user->save() )
+            {
+                $result['status'] = 'OK';
+                $result['user'] = $user->attributes;
+            }
+            else
+            {
+                $result['status'] = 'Error';
+                $result['message'] = '创建用户失败，请重新尝试';
+            }
+        }
+        else
+        {
+            $result['status'] = 'Error';
+            $result['message'] = '请确保所有项目均已填写';
+        }
+        
+        echo CJSON::encode($result);
+        Yii::app()->end();
+    }
+    
+    public function actionGetCategories()
+    {
+        $result = array();
+        
+        if (!$this->_checkAuth())
+        {
+            $result['status'] = 'Error';
+            $result['message'] = '邮箱或密码错误';
+        }
+        else
+        {
+            $categories = Category::model()->findAll();
+            $result['status'] = 'OK';
+            $result['message'] = '';
+            $result['categories'] = $categories;
+        }
+        
+        echo CJSON::encode($result);
+        Yii::app()->end();
+    }
+    
+    public function actionGetSubCategories()
+    {
+        $result = array();
+        
+        if (!$this->_checkAuth())
+        {
+            $result['status'] = 'Error';
+            $result['message'] = '邮箱或密码错误';
+        }
+        else
+        {
+            if ( isset($_POST['category_id']) )
+            {
+                $categoryID = $_POST['category_id'];
+                $categories = Category::model()->findAll(array(
+                    'condition' => 'parent_id=:parentID',                    
+                    'params' => array(':parentID' => $categoryID) 
+                ));
+                $result['status'] = 'OK';
+                $result['message'] = '';
+                $result['sub_categories'] = $categories;
+            }
+            else
+            {
+                $result['status'] = 'Error';
+                $result['message'] = 'Incomplete parameter';
+            }
+        }
+        
+        echo CJSON::encode($result);
+        Yii::app()->end();
+    }
+    
+    public function actionSendMessageToAdmin()
+    {
+        $result = array();
+        
+        if (!$this->_checkAuth())
+        {
+            $result['status'] = 'Error';
+            $result['message'] = '邮箱或密码错误';
+        }
+        else
+        {
+            if ( isset($_POST['sender_id']) and isset($_POST['subject']) and isset($_POST['content']) )
+            {
+                $adminUser = User::model()->find('nick_name=:nickName', array(':nickName'=>'admin'));
+                $adminID = $adminUser->id;
+                
+                $message = new Message;
+                $message->sender_id = $_POST['sender_id'];
+                $message->receiver_id = $adminID;
+                $message->subject = $_POST['subject'];
+                $message->content = $_POST['content'];
+                $message->date = gmdate("Y-m-d h:i:s", time());
+                
+                if ( isset($_POST['parent_message_id']) )
+                {
+                    $message->parent_message_id = $_POST['parent_message_id'];
+                }
+                
+                if ( $message->save() )
+                {
+                    $result['status'] = 'OK';
+                    $result['message'] = '';
+                    $result['sent_message'] = '';
+                }
+                else
+                {
+                    $result['status'] = 'Error';
+                    $result['message'] = '发送信息失败，请重新尝试';
+                }                
+            }
+            else
+            {
+                $result['status'] = 'Error';
+                $result['message'] = 'Incomplete parameter';
+            }
+        }
+        
+        echo CJSON::encode($result);
+        Yii::app()->end();
+    }
+    
+    function actionGetMessages()
+    {
+        $result = array();
+        
+        if (!$this->_checkAuth())
+        {
+            $result['status'] = 'Error';
+            $result['message'] = '邮箱或密码错误';
+        }
+        else
+        {
+            if ( isset($_POST['user_id']) )
+            {
+                $userID = $_POST['user_id'];                
+                $messages = Message::model()->findAll(array(
+                    'condition' => 'sender_id=:userID or receiver_id=:userID',                    
+                    'params' => array(':userID' => $userID) 
+                ));
+                $result['status'] = 'OK';
+                $result['message'] = '';
+                $result['messages'] = $messages;
+            }
+            else
+            {
+                $result['status'] = 'Error';
+                $result['message'] = 'Incomplete parameter';
+            }
+        }
+        
+        echo CJSON::encode($result);
+        Yii::app()->end();
+    }
+
 }
 
 ?>
