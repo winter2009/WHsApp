@@ -5,12 +5,13 @@
  *
  * The followings are the available columns in table 'mc_user':
  * @property integer $id
- * @property string $username
+ * @property string $email
  * @property string $password
  * @property string $created
  * @property string $modified
  * @property integer $role_id
  * @property string $salt
+ * @property string $nick_name
  */
 class User extends CActiveRecord
 {
@@ -25,13 +26,13 @@ class User extends CActiveRecord
 	{
 		return parent::model($className);
 	}
-    
+
     public static function generateSalt()
     {
         return "$2a$07$".md5(mcrypt_create_iv(22, MCRYPT_DEV_URANDOM))."$";
     }
     
-    /**
+	/**
      * perform one-way encryption on the password before we store it in the database
      */
     protected function afterValidate()
@@ -66,15 +67,15 @@ class User extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('username, password, role_id', 'required'),
+			array('email, password, role_id, nick_name', 'required'),
             array('password', 'compare'),
             array('password_repeat, salt', 'safe'),
 			array('role_id', 'numerical', 'integerOnly'=>true),
-			array('username, password, created, modified', 'length', 'max'=>255),
+			array('email, password, created, modified, nick_name', 'length', 'max'=>255),
 			array('salt', 'length', 'max'=>64),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, username, password, created, modified, role_id, salt', 'safe', 'on'=>'search'),
+			array('id, email, password, created, modified, role_id, salt, nick_name', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -97,12 +98,13 @@ class User extends CActiveRecord
 	{
 		return array(
 			'id' => 'ID',
-			'username' => 'Username',
+			'email' => 'Email',
 			'password' => 'Password',
 			'created' => 'Created',
 			'modified' => 'Modified',
 			'role_id' => 'Role',
 			'salt' => 'Salt',
+			'nick_name' => 'Nick Name',
 		);
 	}
 
@@ -118,12 +120,13 @@ class User extends CActiveRecord
 		$criteria=new CDbCriteria;
 
 		$criteria->compare('id',$this->id);
-		$criteria->compare('username',$this->username,true);
+		$criteria->compare('email',$this->email,true);
 		$criteria->compare('password',$this->password,true);
 		$criteria->compare('created',$this->created,true);
 		$criteria->compare('modified',$this->modified,true);
 		$criteria->compare('role_id',$this->role_id);
 		$criteria->compare('salt',$this->salt,true);
+		$criteria->compare('nick_name',$this->nick_name,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
