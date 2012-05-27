@@ -9,10 +9,17 @@
 
 	<?php echo $form->errorSummary($model); ?>
 
+    <div class="row">
+		<?php echo $form->labelEx($model,'nick_name'); ?>
+		<?php echo $form->textField($model,'nick_name',array('size'=>60,'maxlength'=>255)); ?>
+		<?php echo $form->error($model,'nick_name'); ?>
+	</div>
+
+    
 	<div class="row">
-		<?php echo $form->labelEx($model,'username'); ?>
-		<?php echo $form->textField($model,'username',array('size'=>60,'maxlength'=>255)); ?>
-		<?php echo $form->error($model,'username'); ?>
+		<?php echo $form->labelEx($model,'email'); ?>
+		<?php echo $form->textField($model,'email',array('size'=>60,'maxlength'=>255)); ?>
+		<?php echo $form->error($model,'email'); ?>
 	</div>
 
 	<div class="row">
@@ -20,8 +27,8 @@
 		<?php echo $form->passwordField($model,'password',array('size'=>60,'maxlength'=>255)); ?>
 		<?php echo $form->error($model,'password'); ?>
 	</div>
-    
-    <div class="row">
+
+	<div class="row">
 		<?php echo $form->labelEx($model,'password_repeat'); ?>
 		<?php echo $form->passwordField($model,'password_repeat',array('size'=>60,'maxlength'=>128)); ?>
 		<?php echo $form->error($model,'password_repeat'); ?>
