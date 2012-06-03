@@ -42,7 +42,7 @@ class Media extends CActiveRecord
 		return array(
 			array('media_name, media_url, sub_category_id', 'required'),
 			array('sub_category_id', 'numerical', 'integerOnly'=>true),
-			array('media_name, media_url, media_created, media_modified, media_description', 'length', 'max'=>255),
+			array('media_name, media_url, media_created, media_modified', 'length', 'max'=>255),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id, media_name, media_url, media_created, media_modified, media_description, sub_category_id', 'safe', 'on'=>'search'),

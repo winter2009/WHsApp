@@ -77,20 +77,20 @@ class ApiController extends Controller
         else
         {
             // TODO: using transactions
-            $user = User::model()->find('LOWER(username)=?', array(strtolower($_SERVER['HTTP_USERNAME'])));
-            
+            $user = User::model()->find('LOWER(email)=?', array(strtolower($_SERVER['HTTP_USERNAME'])));
+
             $result['status'] = 'OK';
-            $result['user'] = $user;            
+            $result['user'] = $user;
         }
 
         echo CJSON::encode($result);
         Yii::app()->end();
     }
-    
+
     public function actionRegisterUser()
     {
         $result = array();
-        if ( isset($_POST['nick_name']) and isset($_POST['email']) and isset($_POST['password']) )
+        if (isset($_POST['nick_name']) and isset($_POST['email']) and isset($_POST['password']))
         {
             $user = new User;
             $user->nick_name = $_POST['nick_name'];
@@ -98,8 +98,8 @@ class ApiController extends Controller
             $user->password_repeat = $_POST['password'];
             $user->salt = User::generateSalt();
             $user->email = $_POST['email'];
-            
-            if ( $user->save() )
+
+            if ($user->save())
             {
                 $result['status'] = 'OK';
                 $result['user'] = $user->attributes;
@@ -115,15 +115,15 @@ class ApiController extends Controller
             $result['status'] = 'Error';
             $result['message'] = '请确保所有项目均已填写';
         }
-        
+
         echo CJSON::encode($result);
         Yii::app()->end();
     }
-    
+
     public function actionGetCategories()
     {
         $result = array();
-        
+
         if (!$this->_checkAuth())
         {
             $result['status'] = 'Error';
@@ -136,15 +136,14 @@ class ApiController extends Controller
             $result['message'] = '';
             $result['categories'] = $categories;
         }
-        
+
         echo CJSON::encode($result);
         Yii::app()->end();
     }
-    
+
     public function actionGetSubCategories()
     {
         $result = array();
-        
         if (!$this->_checkAuth())
         {
             $result['status'] = 'Error';
@@ -152,16 +151,17 @@ class ApiController extends Controller
         }
         else
         {
-            if ( isset($_POST['category_id']) )
+            if ( isset($_POST['category']) )
             {
-                $categoryID = $_POST['category_id'];
-                $categories = Category::model()->findAll(array(
-                    'condition' => 'parent_id=:parentID',                    
-                    'params' => array(':parentID' => $categoryID) 
+                $categoryName = $_POST['category'];
+                $category = Category::model()->find('LOWER(category_name)=?', array(strtolower($categoryName)));
+                $subCategories = SubCategory::model()->findAll(array(
+                    'condition' => 'parent_id=:parentID',
+                    'params' => array(':parentID' => $category->id) 
                 ));
                 $result['status'] = 'OK';
                 $result['message'] = '';
-                $result['sub_categories'] = $categories;
+                $result['sub_categories'] = $subCategories;
             }
             else
             {
@@ -169,15 +169,14 @@ class ApiController extends Controller
                 $result['message'] = 'Incomplete parameter';
             }
         }
-        
         echo CJSON::encode($result);
         Yii::app()->end();
     }
-    
+
     public function actionSendMessageToAdmin()
     {
         $result = array();
-        
+
         if (!$this->_checkAuth())
         {
             $result['status'] = 'Error';
@@ -185,24 +184,24 @@ class ApiController extends Controller
         }
         else
         {
-            if ( isset($_POST['sender_id']) and isset($_POST['subject']) and isset($_POST['content']) )
+            if (isset($_POST['sender_id']) and isset($_POST['subject']) and isset($_POST['content']))
             {
-                $adminUser = User::model()->find('nick_name=:nickName', array(':nickName'=>'admin'));
+                $adminUser = User::model()->find('nick_name=:nickName', array(':nickName' => 'admin'));
                 $adminID = $adminUser->id;
-                
+
                 $message = new Message;
                 $message->sender_id = $_POST['sender_id'];
                 $message->receiver_id = $adminID;
                 $message->subject = $_POST['subject'];
                 $message->content = $_POST['content'];
                 $message->date = gmdate("Y-m-d h:i:s", time());
-                
-                if ( isset($_POST['parent_message_id']) )
+
+                if (isset($_POST['parent_message_id']))
                 {
                     $message->parent_message_id = $_POST['parent_message_id'];
                 }
-                
-                if ( $message->save() )
+
+                if ($message->save())
                 {
                     $result['status'] = 'OK';
                     $result['message'] = '';
@@ -212,7 +211,7 @@ class ApiController extends Controller
                 {
                     $result['status'] = 'Error';
                     $result['message'] = '发送信息失败，请重新尝试';
-                }                
+                }
             }
             else
             {
@@ -220,15 +219,15 @@ class ApiController extends Controller
                 $result['message'] = 'Incomplete parameter';
             }
         }
-        
+
         echo CJSON::encode($result);
         Yii::app()->end();
     }
-    
+
     function actionGetMessages()
     {
         $result = array();
-        
+
         if (!$this->_checkAuth())
         {
             $result['status'] = 'Error';
@@ -236,13 +235,13 @@ class ApiController extends Controller
         }
         else
         {
-            if ( isset($_POST['user_id']) )
+            if (isset($_POST['user_id']))
             {
-                $userID = $_POST['user_id'];                
+                $userID = $_POST['user_id'];
                 $messages = Message::model()->findAll(array(
-                    'condition' => 'sender_id=:userID or receiver_id=:userID',                    
-                    'params' => array(':userID' => $userID) 
-                ));
+                    'condition' => 'sender_id=:userID or receiver_id=:userID',
+                    'params' => array(':userID' => $userID)
+                    ));
                 $result['status'] = 'OK';
                 $result['message'] = '';
                 $result['messages'] = $messages;
@@ -253,7 +252,40 @@ class ApiController extends Controller
                 $result['message'] = 'Incomplete parameter';
             }
         }
-        
+
+        echo CJSON::encode($result);
+        Yii::app()->end();
+    }
+
+    public function actionGetMediaForSubCategory()
+    {
+        $result = array();
+
+        if (!$this->_checkAuth())
+        {
+            $result['status'] = 'Error';
+            $result['message'] = '邮箱或密码错误';
+        }
+        else
+        {
+            if ( isset($_POST['sub_category_id']) )
+            {
+                $subCategoryID = $_POST['sub_category_id'];
+                $media = Media::model()->findAll(array(
+                    'condition' => 'sub_category_id=:subCategoryID',
+                    'params' => array(':subCategoryID' => $subCategoryID)
+                    ));
+                $result['status'] = 'OK';
+                $result['message'] = '';
+                $result['media'] = $media;
+            }
+            else
+            {
+                $result['status'] = 'Error';
+                $result['message'] = 'Incomplete parameter';
+            }
+        }
+
         echo CJSON::encode($result);
         Yii::app()->end();
     }
