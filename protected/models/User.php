@@ -69,6 +69,7 @@ class User extends CActiveRecord
 		return array(
 			array('email, password, role_id, nick_name', 'required'),
             array('password', 'compare'),
+            array('email', 'unique'),
             array('password_repeat, salt', 'safe'),
 			array('role_id', 'numerical', 'integerOnly'=>true),
 			array('email, password, created, modified, nick_name', 'length', 'max'=>255),

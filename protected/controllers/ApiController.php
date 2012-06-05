@@ -92,22 +92,35 @@ class ApiController extends Controller
         $result = array();
         if (isset($_POST['nick_name']) and isset($_POST['email']) and isset($_POST['password']))
         {
-            $user = new User;
-            $user->nick_name = $_POST['nick_name'];
-            $user->password = $_POST['password'];
-            $user->password_repeat = $_POST['password'];
-            $user->salt = User::generateSalt();
-            $user->email = $_POST['email'];
+            $checkUser = User::model()->findAll(array(
+                'condition' => 'email=:email',
+                'params' => array(':email' => $_POST['email']),
+                ));
 
-            if ($user->save())
+            if ($checkUser != NULL && sizeof($checkUser) > 0)
             {
-                $result['status'] = 'OK';
-                $result['user'] = $user->attributes;
+                $result['status'] = 'Error';
+                $result['message'] = '此邮箱已被使用，请使用不同邮箱注册';
             }
             else
             {
-                $result['status'] = 'Error';
-                $result['message'] = '创建用户失败，请重新尝试';
+                $user = new User;
+                $user->nick_name = $_POST['nick_name'];
+                $user->password = $_POST['password'];
+                $user->password_repeat = $_POST['password'];               
+                $user->salt = User::generateSalt();
+                $user->email = $_POST['email'];
+                
+                if ($user->save())
+                {
+                    $result['status'] = 'OK';
+                    $result['user'] = $user->attributes;
+                }
+                else
+                {
+                    $result['status'] = 'Error';
+                    $result['message'] = '创建用户失败，请重新尝试';
+                }
             }
         }
         else
@@ -151,14 +164,14 @@ class ApiController extends Controller
         }
         else
         {
-            if ( isset($_POST['category']) )
+            if (isset($_POST['category']))
             {
                 $categoryName = $_POST['category'];
                 $category = Category::model()->find('LOWER(category_name)=?', array(strtolower($categoryName)));
                 $subCategories = SubCategory::model()->findAll(array(
                     'condition' => 'parent_id=:parentID',
-                    'params' => array(':parentID' => $category->id) 
-                ));
+                    'params' => array(':parentID' => $category->id)
+                    ));
                 $result['status'] = 'OK';
                 $result['message'] = '';
                 $result['sub_categories'] = $subCategories;
@@ -268,7 +281,7 @@ class ApiController extends Controller
         }
         else
         {
-            if ( isset($_POST['sub_category_id']) )
+            if (isset($_POST['sub_category_id']))
             {
                 $subCategoryID = $_POST['sub_category_id'];
                 $media = Media::model()->findAll(array(
