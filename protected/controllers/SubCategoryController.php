@@ -2,6 +2,8 @@
 
 class SubCategoryController extends Controller
 {
+    private $_category = null;
+    
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
 	 * using two-column layout. See 'protected/views/layouts/column2.php'.
@@ -15,6 +17,7 @@ class SubCategoryController extends Controller
 	{
 		return array(
 			'accessControl', // perform access control for CRUD operations
+            'categoryContext + create index admin', // check to ensure valid category context
 		);
 	}
 
@@ -50,8 +53,15 @@ class SubCategoryController extends Controller
 	 */
 	public function actionView($id)
 	{
+        $mediaProvider = new CActiveDataProvider('Media', array(
+            'criteria' => array(
+                'condition' => 'sub_category_id=:subCategoryID',
+                'params' => array(':subCategoryID' => $id),
+            )
+        ));
 		$this->render('view',array(
 			'model'=>$this->loadModel($id),
+            'mediaProvider'=>$mediaProvider,
 		));
 	}
 
@@ -62,7 +72,7 @@ class SubCategoryController extends Controller
 	public function actionCreate()
 	{
 		$model=new SubCategory;
-
+        $model->parent_id = $this->_category->id;
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
@@ -158,6 +168,7 @@ class SubCategoryController extends Controller
 		$model=SubCategory::model()->findByPk($id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
+        
 		return $model;
 	}
 
@@ -173,4 +184,39 @@ class SubCategoryController extends Controller
 			Yii::app()->end();
 		}
 	}
+    
+    protected function loadCategory($category_id)
+    {
+        // if the category property is null, create it based on input id
+        if ( $this->_category === null )
+        {
+            $this->_category = Category::model()->findByPk($category_id);
+            if ( $this->_category === null )
+            {
+                throw new CHttpException(404, 'The requested category does not exist.');
+            }
+        }
+        
+        return $this->_category;
+    }
+    
+    public function filterCategoryContext($filterChain)
+    {
+        // set the grant identifier based on either the GET or POST input
+        // request variables, since we allow both types for our actions
+        $categoryID = null;
+        if ( isset($_GET['gid']) )
+        {
+            $categoryID = $_GET['gid'];
+        }
+        else if ( isset($_POST['gid']) )
+        {
+            $categoryID = $_POST['gid'];
+        }
+        
+        $this->loadCategory($categoryID);
+        
+        // complete the running of other filters and execute the requested action
+        $filterChain->run();
+    }
 }

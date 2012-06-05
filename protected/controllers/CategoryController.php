@@ -31,7 +31,7 @@ class CategoryController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update'),
+				'actions'=>array('create','update', 'admin', 'delete', 'index', 'view'),
 				'users'=>array('@'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
@@ -50,8 +50,15 @@ class CategoryController extends Controller
 	 */
 	public function actionView($id)
 	{
+        $subCategoryProvider = new CActiveDataProvider('SubCategory', array(
+            'criteria' => array(
+                'condition' => 'parent_id=:parentID',
+                'params' => array('parentID' => $id),
+            )
+        ));
 		$this->render('view',array(
 			'model'=>$this->loadModel($id),
+            'subCategoryProvider' => $subCategoryProvider,
 		));
 	}
 

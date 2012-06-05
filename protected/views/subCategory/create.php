@@ -1,7 +1,7 @@
 <?php
 $this->breadcrumbs=array(
-	'Sub Categories'=>array('index'),
-	'Create',
+	'Sub Categories'=>array('subCategory/index'),
+	'Create Sub Category',
 );
 
 $this->menu=array(

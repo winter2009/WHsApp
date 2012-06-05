@@ -21,6 +21,15 @@ $this->menu=array(
 		'id',
 		'sub_category_name',
 		'sub_category_description',
-		'parent_id',
+//		'parent_id',
 	),
 )); ?>
+
+
+<br><br>
+<h1>Media</h1>
+<?php $this->widget('zii.widgets.CListView', array(
+    'dataProvider' => $mediaProvider,
+    'itemView' => '/media/_view',
+));
+?>

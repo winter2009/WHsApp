@@ -8,6 +8,8 @@
  * @property string $sub_category_name
  * @property string $sub_category_description
  * @property integer $parent_id
+ * 
+ * @property Category $category
  */
 class SubCategory extends CActiveRecord
 {
@@ -54,6 +56,7 @@ class SubCategory extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+            'category' => array(self::BELONGS_TO, 'Category', 'parent_id'),
 		);
 	}
 

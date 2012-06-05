@@ -10,6 +10,7 @@ $this->menu=array(
 	array('label'=>'Update Category', 'url'=>array('update', 'id'=>$model->id)),
 	array('label'=>'Delete Category', 'url'=>'#', 'linkOptions'=>array('submit'=>array('delete','id'=>$model->id),'confirm'=>'Are you sure you want to delete this item?')),
 	array('label'=>'Manage Category', 'url'=>array('admin')),
+    array('label'=>'Add Sub Category', 'url'=>array('subCategory/create', 'gid'=>$model->id)),
 );
 ?>
 
@@ -23,3 +24,12 @@ $this->menu=array(
 		'category_description',
 	),
 )); ?>
+
+<br>
+<br>
+<h1>Sub Categories</h1>
+<?php $this->widget('zii.widgets.CListView', array(
+    'dataProvider' => $subCategoryProvider,
+    'itemView' => '/subCategory/_view',
+));
+?>
