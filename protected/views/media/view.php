@@ -1,6 +1,9 @@
 <?php
 $this->breadcrumbs=array(
-	'Medias'=>array('index'),
+//	'Medias'=>array('index'),
+    'Category'=>array('category/index'),
+    $category->category_name => array('category/view/'.$category->id),
+    $subcategory->sub_category_name => array('subCategory/view/'.$subcategory->id),
 	$model->id,
 );
 

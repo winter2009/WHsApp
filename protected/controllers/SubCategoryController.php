@@ -58,10 +58,11 @@ class SubCategoryController extends Controller
                 'condition' => 'sub_category_id=:subCategoryID',
                 'params' => array(':subCategoryID' => $id),
             )
-        ));
+        ));        
 		$this->render('view',array(
 			'model'=>$this->loadModel($id),
             'mediaProvider'=>$mediaProvider,
+            'category'=>$this->_category->category_name, 
 		));
 	}
 
@@ -168,7 +169,7 @@ class SubCategoryController extends Controller
 		$model=SubCategory::model()->findByPk($id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
-        
+        $this->loadCategory($model->parent_id);
 		return $model;
 	}
 

@@ -50,8 +50,13 @@ class MediaController extends Controller
 	 */
 	public function actionView($id)
 	{
+        $model = $this->loadModel($id);
+        $subCategory = SubCategory::model()->findByPk($model->sub_category_id);
+        $category = Category::model()->findByPk($subCategory->parent_id);
 		$this->render('view',array(
-			'model'=>$this->loadModel($id),
+			'model'=>$model,
+            'subcategory'=>$subCategory,
+            'category'=>$category,
 		));
 	}
 

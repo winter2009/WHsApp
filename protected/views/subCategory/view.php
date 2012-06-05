@@ -1,6 +1,8 @@
 <?php
 $this->breadcrumbs=array(
-	'Sub Categories'=>array('index'),
+//	'Sub Categories'=>array('index'),
+    'Categories'=>array('category/index'),
+    $category => array('category/view/'.$model->parent_id),
 	$model->id,
 );
 
