@@ -2,6 +2,8 @@
 
 class MediaController extends Controller
 {
+    private $_subCategory = null;
+    
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
 	 * using two-column layout. See 'protected/views/layouts/column2.php'.
@@ -15,6 +17,7 @@ class MediaController extends Controller
 	{
 		return array(
 			'accessControl', // perform access control for CRUD operations
+            'subCategoryContext + create index admin', // check to ensure valid category context
 		);
 	}
 
@@ -67,7 +70,7 @@ class MediaController extends Controller
 	public function actionCreate()
 	{
 		$model=new Media;
-
+        $model->sub_category_id = $this->_subCategory->id;
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
@@ -78,8 +81,13 @@ class MediaController extends Controller
 				$this->redirect(array('view','id'=>$model->id));
 		}
 
+        $subCategory = SubCategory::model()->findByPk($this->_subCategory->id);
+        $category = Category::model()->findByPk($this->_subCategory->parent_id);
+        
 		$this->render('create',array(
 			'model'=>$model,
+            'subcategory'=>$subCategory,
+            'category'=>$category,
 		));
 	}
 
@@ -178,4 +186,39 @@ class MediaController extends Controller
 			Yii::app()->end();
 		}
 	}
+    
+    protected function loadSubCategory($sub_category_id)
+    {
+        // if the category property is null, create it based on input id
+        if ( $this->_subCategory === null )
+        {
+            $this->_subCategory = SubCategory::model()->findByPk($sub_category_id);
+            if ( $this->_subCategory === null )
+            {
+                throw new CHttpException(404, 'The requested sub category does not exist.');
+            }
+        }
+        
+        return $this->_subCategory;
+    }
+    
+    public function filterSubCategoryContext($filterChain)
+    {
+        // set the grant identifier based on either the GET or POST input
+        // request variables, since we allow both types for our actions
+        $subCategoryID = null;
+        if ( isset($_GET['sid']) )
+        {
+            $subCategoryID = $_GET['sid'];
+        }
+        else if ( isset($_POST['sid']) )
+        {
+            $subCategoryID = $_POST['sid'];
+        }
+        
+        $this->loadSubCategory($subCategoryID);
+        
+        // complete the running of other filters and execute the requested action
+        $filterChain->run();
+    }
 }

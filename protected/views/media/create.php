@@ -1,13 +1,15 @@
 <?php
 $this->breadcrumbs=array(
-	'Medias'=>array('index'),
+	'Category'=>array('category/index'),
+    $category->category_name => array('category/view/'.$category->id),
+    $subcategory->sub_category_name => array('subCategory/view/'.$subcategory->id),
 	'Create',
 );
 
-$this->menu=array(
-	array('label'=>'List Media', 'url'=>array('index')),
-	array('label'=>'Manage Media', 'url'=>array('admin')),
-);
+//$this->menu=array(
+//	array('label'=>'List Media', 'url'=>array('index')),
+//	array('label'=>'Manage Media', 'url'=>array('admin')),
+//);
 ?>
 
 <h1>Create Media</h1>
